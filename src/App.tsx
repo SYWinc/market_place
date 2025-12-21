@@ -80,7 +80,7 @@ function App() {
                   className="group flex items-center space-x-2 px-5 py-2 bg-gradient-to-br from-amber-400 via-orange-500 to-yellow-600 text-white font-bold rounded-xl shadow-[0_4px_0_0_rgba(217,119,6,1)] active:shadow-none active:translate-y-1 transition-all duration-150 border border-amber-200/20"
                 >
                   <Users className="w-5 h-5 group-hover:-translate-y-1 transition-transform" />
-                  <span className="hidden sm:inline">USUARIOS</span>
+                  <span className="hidden sm:inline">CREDITOS</span>
                 </Link>
               </li>
               <li>
