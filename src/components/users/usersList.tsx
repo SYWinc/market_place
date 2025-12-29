@@ -490,6 +490,14 @@ const UsersList: React.FC = () => {
                 required
                 className="w-full p-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 outline-none"
               />
+              <input
+                type="email"
+                name="email"
+                placeholder="CORREO ELECTRÓNICO"
+                value={newUser.email}
+                onChange={handleInputChange}
+                className="w-full p-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 outline-none"
+              />
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
@@ -833,7 +841,8 @@ const UsersList: React.FC = () => {
               ¿Eliminar cliente?
             </h3>
             <p className="font-bold text-gray-800 mb-4">
-              ¿Eliminar a <span className="italic">"{deleteConfirmation.userName}"</span>?
+              ¿Eliminar a{" "}
+              <span className="italic">"{deleteConfirmation.userName}"</span>?
             </p>
             <p className="text-[10px] text-gray-600 mb-6 font-bold uppercase">
               Esta acción es irreversible y eliminará todos sus pedidos.
@@ -841,7 +850,11 @@ const UsersList: React.FC = () => {
             <div className="flex gap-3">
               <button
                 onClick={() =>
-                  setDeleteConfirmation({ isOpen: false, userId: null, userName: "" })
+                  setDeleteConfirmation({
+                    isOpen: false,
+                    userId: null,
+                    userName: "",
+                  })
                 }
                 className="flex-1 bg-gray-200 border-2 border-black font-black py-2 rounded-lg uppercase text-sm"
               >

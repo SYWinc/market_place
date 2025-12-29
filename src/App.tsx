@@ -16,6 +16,7 @@ import {
   LogOut,
   Power,
   ClipboardList,
+  Package,
 } from "lucide-react";
 
 import Auth from "./authentication/auth";
@@ -23,6 +24,11 @@ import AddProduct from "./components/products/addProduct";
 import ViewProducts from "./components/products/viewProduct";
 import UsersList from "./components/users/usersList";
 import TodoList from "./components/todo/TodoList";
+import Profile from "./components/userProfile/profile";
+import Orders from "./components/orders/orders";
+import AdminOrders from "./components/AdminOrders/adminOrders";
+
+const ADMIN_EMAIL = "sywinclopez@gmail.com";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -92,6 +98,15 @@ function App() {
                   <span className="hidden sm:inline">LISTAS</span>
                 </Link>
               </li>
+                <li>
+                <Link
+                  to="/admin/orders"
+                  className="group flex items-center space-x-2 px-5 py-2 bg-gradient-to-br from-fuchsia-500 via-purple-600 to-indigo-700 text-white font-bold rounded-xl shadow-[0_4px_0_0_rgba(107,33,168,1)] active:shadow-none active:translate-y-1 transition-all duration-150 border border-purple-300/20"
+                >
+                  <Package className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  <span className="hidden sm:inline">PEDIDOS</span>
+                </Link>
+              </li>
             </ul>
 
             {/* Botón Salir - Esquina Derecha */}
@@ -108,31 +123,97 @@ function App() {
         <Routes>
           <Route
             path="/login"
-            element={!user ? <Auth /> : <Navigate to="/view-products" />}
+            element={
+              !user ? (
+                <Auth />
+              ) : user.email === ADMIN_EMAIL ? (
+                <Navigate to="/view-products" />
+              ) : (
+                <Navigate to="/profile" />
+              )
+            }
           />
 
-          {/* Rutas protegidas */}
+          {/* Rutas protegidas SOLO para admin */}
           <Route
             path="/view-products"
-            element={user ? <ViewProducts /> : <Navigate to="/login" />}
+            element={
+              user && user.email === ADMIN_EMAIL ? (
+                <ViewProducts />
+              ) : (
+                <Navigate to="/profile" />
+              )
+            }
           />
           <Route
             path="/add-product"
-            element={user ? <AddProduct /> : <Navigate to="/login" />}
+            element={
+              user && user.email === ADMIN_EMAIL ? (
+                <AddProduct />
+              ) : (
+                <Navigate to="/profile" />
+              )
+            }
           />
           <Route
             path="/users"
-            element={user ? <UsersList /> : <Navigate to="/login" />}
+            element={
+              user && user.email === ADMIN_EMAIL ? (
+                <UsersList />
+              ) : (
+                <Navigate to="/profile" />
+              )
+            }
           />
           <Route
             path="/todo"
-            element={user ? <TodoList /> : <Navigate to="/login" />}
+            element={
+              user && user.email === ADMIN_EMAIL ? (
+                <TodoList />
+              ) : (
+                <Navigate to="/profile" />
+              )
+            }
+          />
+
+          {/* Ruta de pedidos: accesible para todos los usuarios autenticados */}
+          <Route
+            path="/orders"
+            element={user ? <Orders /> : <Navigate to="/login" />}
+          />
+
+          {/* 🔒 Ruta protegida: solo admin puede ver todos los pedidos */}
+          <Route
+            path="/admin/orders"
+            element={
+              user && user.email === ADMIN_EMAIL ? (
+                <AdminOrders />
+              ) : (
+                <Navigate to="/profile" />
+              )
+            }
+          />
+
+          {/* Nueva ruta de perfil para no-admins */}
+          <Route
+            path="/profile"
+            element={user ? <Profile /> : <Navigate to="/login" />}
           />
 
           {/* Redirección por defecto */}
           <Route
             path="*"
-            element={<Navigate to={user ? "/view-products" : "/login"} />}
+            element={
+              user ? (
+                user.email === ADMIN_EMAIL ? (
+                  <Navigate to="/view-products" />
+                ) : (
+                  <Navigate to="/profile" />
+                )
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
         </Routes>
       </div>

@@ -3,68 +3,120 @@ import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import * as XLSX from 'xlsx';
+import { Form } from 'react-router-dom';
+
+// Definición de categorías (misma que en ViewProducts)
+const CATEGORIES = [
+  { id: "carnes-frias", name: "Carnes frías", icon: "🍖" },
+  { id: "legumbres", name: "Legumbres", icon: "🫘" },
+  { id: "frutas-verduras", name: "Frutas y verduras", icon: "🥦" },
+  { id: "panes", name: "Panes", icon: "🍞" },
+  { id: "gaseosas", name: "Gaseosas", icon: "🥤" },
+  { id: "lacteos", name: "Lacteos", icon: "🥛" },
+  { id: "mecatos", name: "Mecatos", icon: "🍿" },
+  { id: "medicamentos", name: "Medicamentos", icon: "💊" },
+  { id: "aseo-hogar", name: "Aseo Hogar", icon: "🧼" },
+  { id: "aseo-personal", name: "Aseo Personal", icon: "🧴" },
+  { id: "bastimentos", name: "Bastimentos", icon: "🧂" },
+  { id: "enlatados", name: "Enlatados", icon: "🥫" },
+  { id: "dulceria", name: "Dulcería", icon: "🍬" },
+  { id: "galletas", name: "Galletas", icon: "🍪" },
+  { id: "canasta-familiar", name: "Canasta familiar", icon: "🧺" },
+] as const;
+
+type CategoryId = typeof CATEGORIES[number]["id"];
+type FormCategory = CategoryId | '';
 
 interface Product {
   codigo: string;
   descripcion: string;
   unidadMedida: string;
-  costoUnitario: number;
+  precioUnitario: number;
   iva: string;
   precioConIva: number;
   precioVenta: number;
   proveedor: string;
+  categoria: CategoryId;
+}
+
+// Tipo para el estado del formulario
+interface FormProduct {
+  codigo: string;
+  descripcion: string;
+  unidadMedida: string;
+  precioUnitario: number;
+  iva: string;
+  precioConIva: number;
+  precioVenta: number;
+  proveedor: string;
+  categoria: FormCategory;
 }
 
 const AddProduct: React.FC = () => {
-  const [newProduct, setNewProduct] = useState<Product>({
-    codigo: '',
-    descripcion: '',
-    unidadMedida: '1',
-    costoUnitario: 0,
-    iva: '0%',
-    precioConIva: 0,
-    precioVenta: 0,
-    proveedor: '',
-  });
+const [newProduct, setNewProduct] = useState<FormProduct>({
+  codigo: '',
+  descripcion: '',
+  unidadMedida: '1',
+  precioUnitario: 0,
+  iva: '0%',
+  precioConIva: 0,
+  precioVenta: 0,
+  proveedor: '',
+  categoria: '',
+});
 
   const [isUploading, setIsUploading] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({
       ...prev,
-      [name]: name === 'costoUnitario' || name === 'precioConIva' || name === 'precioVenta' ? parseFloat(value) || 0 : value,
+      [name]: name === 'precioUnitario' || name === 'precioConIva' || name === 'precioVenta' ? parseFloat(value) || 0 : value,
     }));
   };
 
-  const handleCreateProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProduct.descripcion.trim()) return;
+ const handleCreateProduct = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!newProduct.descripcion.trim() || !newProduct.categoria) {
+    alert("Por favor selecciona una categoría.");
+    return;
+  }
 
-    try {
-      await addDoc(collection(db, "products"), newProduct);
-      
-      // Notificación retro en vez de alert
-      setNotification({ message: 'Producto agregado con éxito', type: 'success' });
-      setTimeout(() => setNotification(null), 3000);
-      
-      setNewProduct({
-        codigo: '',
-        descripcion: '',
-        unidadMedida: '1',
-        costoUnitario: 0,
-        iva: '0%',
-        precioConIva: 0,
-        precioVenta: 0,
-        proveedor: '',
-      });
-    } catch (error) {
-      console.error("Error al agregar producto: ", error);
-      setNotification({ message: 'Error al agregar el producto', type: 'error' });
-      setTimeout(() => setNotification(null), 3000);
-    }
+  // ✅ Crear objeto seguro para Firestore
+  const productToSave: Product = {
+    codigo: newProduct.codigo,
+    descripcion: newProduct.descripcion,
+    unidadMedida: newProduct.unidadMedida,
+    precioUnitario: newProduct.precioUnitario,
+    iva: newProduct.iva,
+    precioConIva: newProduct.precioConIva,
+    precioVenta: newProduct.precioVenta,
+    proveedor: newProduct.proveedor,
+    categoria: newProduct.categoria as CategoryId, // ✅ ahora es seguro
   };
+
+  try {
+    await addDoc(collection(db, "products"), productToSave); // ✅ usa productToSave
+    setNotification({ message: 'Producto agregado con éxito', type: 'success' });
+    setTimeout(() => setNotification(null), 3000);
+    setNewProduct({
+      codigo: '',
+      descripcion: '',
+      unidadMedida: '1',
+      precioUnitario: 0,
+      iva: '0%',
+      precioConIva: 0,
+      precioVenta: 0,
+      proveedor: '',
+      categoria: '',
+    });
+  } catch (error) {
+    console.error("Error al agregar producto: ", error);
+    setNotification({ message: 'Error al agregar el producto', type: 'error' });
+    setTimeout(() => setNotification(null), 3000);
+  }
+};
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,11 +134,12 @@ const AddProduct: React.FC = () => {
         codigo: String(row['CODIGO'] || row['codigo'] || row['Código'] || row['Id'] || ''),
         descripcion: String(row['DESCRIPCION DEL PRODUCTO'] || row['descripcion'] || row['Descripción'] || row['Nombre'] || ''),
         unidadMedida: String(row['UNIDAD DE MEDIDA'] || row['unidadMedida'] || row['Unidad'] || '1'),
-        costoUnitario: parseFloat(row['PRECIO UNITARIO'] || row['costoUnitario'] || 0) || 0,
+        precioUnitario: parseFloat(row['PRECIO UNITARIO'] || row['precioUnitario'] || 0) || 0,
         iva: String(row['IVA'] || row['iva'] || '0%'),
         precioConIva: parseFloat(row['PRECIO UNITARIO + IVA'] || row['precioConIva'] || 0) || 0,
         precioVenta: parseFloat(row['PRECIO DE VENTA'] || row['precioVenta'] || 0) || 0,
         proveedor: String(row['PROVEEDOR'] || row['proveedor'] || row['Proveedor'] || ''),
+        categoria: String(row['CATEGORIA'] || row['categoria'] || row['Categoría'] || 'sin-categoria') as CategoryId,
       }));
 
       let successCount = 0;
@@ -119,7 +172,6 @@ const AddProduct: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 pb-24">
       <div className="max-w-3xl mx-auto">
-        {/* Header Retro */}
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-black text-indigo-700 tracking-tighter uppercase italic">
             Rosario Store
@@ -129,13 +181,11 @@ const AddProduct: React.FC = () => {
           </p>
         </header>
 
-        {/* Contenedor principal estilo retro */}
         <div className="bg-white border-4 border-indigo-600 rounded-2xl p-6 shadow-[8px_8px_0_0_rgba(79,70,229,1)]">
           <h2 className="text-xl font-black text-indigo-700 mb-6 uppercase text-center">
             Agregar Producto
           </h2>
 
-          {/* Sección de carga Excel */}
           <div className="mb-6 p-4 bg-gray-50 border-2 border-dashed border-indigo-300 rounded-xl">
             <label className="block text-sm font-black text-gray-800 mb-2 uppercase">
               Cargar productos desde Excel
@@ -163,9 +213,7 @@ const AddProduct: React.FC = () => {
 
           <hr className="my-4 border-2 border-indigo-200" />
 
-          {/* Formulario */}
           <form onSubmit={handleCreateProduct} className="space-y-4 font-bold text-sm">
-            {/* Código */}
             <div>
               <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
                 Código
@@ -179,7 +227,6 @@ const AddProduct: React.FC = () => {
               />
             </div>
 
-            {/* Descripción */}
             <div>
               <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
                 Descripción del Producto
@@ -194,7 +241,6 @@ const AddProduct: React.FC = () => {
               />
             </div>
 
-            {/* Unidad de Medida */}
             <div>
               <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
                 UM
@@ -208,22 +254,20 @@ const AddProduct: React.FC = () => {
               />
             </div>
 
-            {/* Precio Unitario */}
             <div>
               <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
                 Costo Unitario
               </label>
               <input
                 type="number"
-                name="costoUnitario"
-                value={newProduct.costoUnitario || ''}
+                name="precioUnitario"
+                value={newProduct.precioUnitario || ''}
                 onChange={handleChange}
                 step="0.01"
                 className="w-full p-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 outline-none"
               />
             </div>
 
-            {/* Precio con IVA */}
             <div>
               <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
                 Precio con IVA
@@ -238,7 +282,6 @@ const AddProduct: React.FC = () => {
               />
             </div>
 
-            {/* Precio de Venta */}
             <div>
               <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
                 Precio de Venta
@@ -253,7 +296,6 @@ const AddProduct: React.FC = () => {
               />
             </div>
 
-            {/* Proveedor */}
             <div>
               <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
                 Proveedor
@@ -267,7 +309,27 @@ const AddProduct: React.FC = () => {
               />
             </div>
 
-            {/* Botón */}
+            {/* ✅ Campo de categoría */}
+            <div>
+              <label className="block text-[10px] font-black text-gray-600 uppercase mb-1">
+                Categoría
+              </label>
+              <select
+                name="categoria"
+                value={newProduct.categoria}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 outline-none bg-white"
+              >
+                <option value="">— Selecciona una categoría —</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.icon} {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="pt-2">
               <button
                 type="submit"
@@ -281,7 +343,6 @@ const AddProduct: React.FC = () => {
         </div>
       </div>
 
-      {/* Notificación estilo retro */}
       {notification && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
           <div
