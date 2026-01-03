@@ -174,7 +174,7 @@ const [newProduct, setNewProduct] = useState<FormProduct>({
       <div className="max-w-3xl mx-auto">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-black text-indigo-700 tracking-tighter uppercase italic">
-            Rosario Store
+            MARKET PLACE
           </h1>
           <p className="text-gray-500 font-bold text-sm">
             GESTIÓN DE PRODUCTOS
