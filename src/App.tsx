@@ -28,7 +28,7 @@ import Profile from "./components/userProfile/profile";
 import Orders from "./components/orders/orders";
 import AdminOrders from "./components/AdminOrders/adminOrders";
 
-const ADMIN_EMAIL = "sywinclopez@gmail.com";
+const ADMIN_EMAIL = "blopez-30@gmail.com";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);

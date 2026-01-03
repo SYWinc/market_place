@@ -6,13 +6,13 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBc4iO1FjcFBEiUuh-Oe_qQ8Fg8usvYlJU",
-  authDomain: "rosariostore-b6715.firebaseapp.com",
-  projectId: "rosariostore-b6715",
-  storageBucket: "rosariostore-b6715.firebasestorage.app",
-  messagingSenderId: "660093857279",
-  appId: "1:660093857279:web:e458f3f76e119717d9cbca",
-  measurementId: "G-GRTZ5TKFPH",
+  apiKey: "AIzaSyCjq7TReoUvyxHNeePKMEwIunrHc_Kq_Fc",
+  authDomain: "marketexpress-c4765.firebaseapp.com",
+  projectId: "marketexpress-c4765",
+  storageBucket: "marketexpress-c4765.firebasestorage.app",
+  messagingSenderId: "580193543228",
+  appId: "1:580193543228:web:94a8d27564613ba34c8f39",
+  measurementId: "G-48YZPPFKFJ"
 };
 
 const app = initializeApp(firebaseConfig);
